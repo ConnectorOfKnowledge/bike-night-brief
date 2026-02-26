@@ -1,416 +1,697 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bike Night Concept Brief v1</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-    body { font-family: 'Inter', sans-serif; background-color: #fafaf9; color: #292524; }
-
-    .chart-container {
-        position: relative;
-        width: 100%;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        height: 300px;
-        max-height: 400px;
-    }
-    @media (min-width: 768px) {
-        .chart-container { height: 350px; }
-    }
-
-    .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
-    .tab-content.active { display: block; }
-
-    .nav-tab { border-bottom: 2px solid transparent; color: #78716c; transition: all 0.2s; }
-    .nav-tab:hover { color: #b91c1c; border-bottom-color: #fca5a5; }
-    .nav-tab.active { color: #991b1b; border-bottom-color: #991b1b; font-weight: 600; }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .interactive-zone { transition: all 0.2s ease; cursor: pointer; }
-    .interactive-zone:hover { transform: scale(0.98); filter: brightness(0.95); }
-    .interactive-zone.selected { border-width: 3px; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Night Blueprint — Applebee's Monroe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        stone: { 50:'#fafaf9',100:'#f5f5f4',200:'#e7e5e3',300:'#d6d3d1',400:'#a8a29e',500:'#78716c',600:'#57534e',700:'#44403c',800:'#292524',900:'#1c1917' },
+                        brand: { red:'#c0392b', redDark:'#962d22', amber:'#d4a017', amberLight:'#fef3cd', amberBorder:'#f0d68a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background: #fafaf9; }
+        .tab-btn { transition: all 0.2s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { border-bottom-color: #c0392b; color: #c0392b; font-weight: 700; }
+        .tab-btn:hover:not(.active) { color: #c0392b; opacity: 0.7; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06); border: 1px solid #e7e5e3; transition: box-shadow 0.2s; }
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .map-zone { cursor: pointer; border: 2px solid transparent; border-radius: 0.5rem; transition: all 0.25s ease; }
+        .map-zone:hover, .map-zone.active { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.15); }
+        .map-zone.active { background: rgba(192,57,43,0.04); }
+        .placeholder-badge { display: inline-block; background: #fef3cd; color: #92700c; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .draft-watermark { position: relative; }
+        .draft-watermark::after { content: 'DRAFT'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg); font-size: 3rem; font-weight: 900; color: rgba(192,57,43,0.07); pointer-events: none; letter-spacing: 0.2em; }
+        .sample-overlay { position: relative; }
+        .sample-overlay::after { content: 'ILLUSTRATIVE — PLACEHOLDER DATA'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-12deg); font-size: 1rem; font-weight: 800; color: rgba(192,57,43,0.13); pointer-events: none; letter-spacing: 0.1em; white-space: nowrap; }
+        .hook-card { border-left: 4px solid #c0392b; }
+        .question-card { border-left: 4px solid #d4a017; }
+        @media (max-width: 640px) {
+            .tab-btn { font-size: 0.72rem; padding: 0.5rem 0.25rem; }
+            .sample-overlay::after { font-size: 0.65rem; }
+        }
+    </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="text-stone-800 min-h-screen">
 
-<header class="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-2">
-            <div>
-                <h1 class="text-3xl font-bold tracking-tight text-stone-900 uppercase">
-                    Bike Night <span class="text-red-700">Concept Brief</span>
-                    <span class="text-stone-400 text-xl font-medium tracking-normal">v1.0</span>
-                </h1>
-                <p class="text-sm text-stone-500 mt-1">Information gathering and operational blueprint for Applebee's Monroe.</p>
-            </div>
-            <div class="mt-4 md:mt-0">
-                <button onclick="switchTab('tab-action')" class="bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm">
-                    Provide Feedback (Build V2)
-                </button>
-            </div>
+    <!-- ═══════════════════════════════════════════ HEADER ═══════════════════════════════════════════ -->
+    <header class="bg-stone-900 text-white">
+        <div class="max-w-5xl mx-auto px-4 py-6 sm:py-8 text-center">
+            <p class="text-stone-400 text-xs tracking-[0.25em] uppercase mb-2">Applebee's Monroe</p>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight">Bike Night Blueprint</h1>
+            <p class="mt-2 text-stone-400 text-sm">v2.0 &mdash; Phase 1: Concept Evaluation</p>
         </div>
+    </header>
 
-        <nav class="flex space-x-6 overflow-x-auto mt-6" aria-label="Tabs">
-            <button onclick="switchTab('tab-pitch')" id="nav-pitch" class="nav-tab active pb-3 px-1 text-sm font-medium whitespace-nowrap">1. The Pitch & Projections</button>
-            <button onclick="switchTab('tab-logistics')" id="nav-logistics" class="nav-tab pb-3 px-1 text-sm font-medium whitespace-nowrap">2. Logistics & Parking</button>
-            <button onclick="switchTab('tab-marketing')" id="nav-marketing" class="nav-tab pb-3 px-1 text-sm font-medium whitespace-nowrap">3. Community Marketing</button>
-            <button onclick="switchTab('tab-compliance')" id="nav-compliance" class="nav-tab pb-3 px-1 text-sm font-medium whitespace-nowrap">4. Compliance & Charity</button>
-            <button onclick="switchTab('tab-action')" id="nav-action" class="nav-tab pb-3 px-1 text-sm font-medium whitespace-nowrap text-red-700">5. GM Action Required</button>
-        </nav>
+    <!-- ═══════════════════════════════════════════ TAB NAV ═══════════════════════════════════════════ -->
+    <nav class="bg-white border-b border-stone-200 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-2 flex overflow-x-auto">
+            <button class="tab-btn active flex-1 text-center py-3 px-2 text-sm font-medium text-stone-600 whitespace-nowrap" data-tab="opportunity">The Opportunity</button>
+            <button class="tab-btn flex-1 text-center py-3 px-2 text-sm font-medium text-stone-600 whitespace-nowrap" data-tab="operations">Operations</button>
+            <button class="tab-btn flex-1 text-center py-3 px-2 text-sm font-medium text-stone-600 whitespace-nowrap" data-tab="marketing">Marketing</button>
+            <button class="tab-btn flex-1 text-center py-3 px-2 text-sm font-medium text-stone-600 whitespace-nowrap" data-tab="compliance">Charity &amp; Compliance</button>
+            <button class="tab-btn flex-1 text-center py-3 px-2 text-sm font-medium text-stone-600 whitespace-nowrap" data-tab="evaluation">Manning's Call</button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════ PERSISTENT BANNER ═══════════════════════════════════════════ -->
+    <div class="bg-brand-amberLight border-b border-brand-amberBorder">
+        <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-1 text-sm">
+            <span class="text-stone-700"><span class="font-semibold">&#9888; Phase 2 cannot begin</span> until Manning completes the evaluation form on Tab 5.</span>
+            <button onclick="switchTab('evaluation')" class="text-brand-red font-semibold hover:underline text-sm whitespace-nowrap">Go to Tab 5 &rarr;</button>
+        </div>
     </div>
-</header>
 
-<main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <!-- ═══════════════════════════════════════════ MAIN CONTENT ═══════════════════════════════════════════ -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
 
-    <section id="tab-pitch" class="tab-content active">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2">The Mid-Week Motor Strategy</h2>
-            <p class="text-stone-600 text-lg">
-                This section outlines the core reasoning behind establishing a monthly Bike Night. The goal is to transform slower Tuesday nights into a high-revenue community pillar by engaging Monroe's dense, high-visibility motorcycle culture.
-            </p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-xl p-6 md:p-8 border border-stone-200 shadow-sm">
-                <h3 class="text-xl font-bold text-stone-900 mb-4 border-b border-stone-100 pb-2">The Core Hooks</h3>
-                <ul class="space-y-4 text-stone-700">
-                    <li class="flex items-start">
-                        <span class="font-bold text-red-700 mr-2">1.</span>
+        <!-- ─────────────────── TAB 1: THE OPPORTUNITY ─────────────────── -->
+        <section id="tab-opportunity" class="tab-panel active space-y-8">
+
+            <!-- Executive Summary -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-2xl font-bold text-stone-900 mb-3">Executive Summary</h2>
+                <p class="text-stone-600 leading-relaxed text-base">
+                    Every restaurant has a dead weeknight. This blueprint proposes transforming one of those nights at Applebee's Monroe into a monthly community motorcycle gathering — complete with food specials, charity tie-ins, and engagement activities that drive incremental revenue, build local loyalty, and generate organic marketing that money can't buy.
+                </p>
+            </div>
+
+            <!-- The Core Hooks -->
+            <div>
+                <h2 class="text-xl font-bold text-stone-900 mb-4">The Core Hooks</h2>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="card hook-card p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">&#127831;</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900">Half-Price Appetizers</h3>
+                                <p class="text-stone-500 text-sm mt-1">Already approved by the GM. This is the anchor that gets riders in the door. Simple, proven, and easy to market.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card hook-card p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">&#129380;</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900">"Rider Fuel" &mdash; N/A Drink Special</h3>
+                                <span class="placeholder-badge mb-1">Concept — Needs Manning's Input</span>
+                                <p class="text-stone-500 text-sm mt-1">Bottomless non-alcoholic option (Red Bull slushies, craft sodas, etc.). Safety-first marketing angle — "We keep our riders fueled, not foolish." Pricing and format are Manning's call.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card hook-card p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">&#127895;</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900">Charity Partnership</h3>
+                                <p class="text-stone-500 text-sm mt-1">Veteran-focused charity gives the event a purpose beyond profit. Bikers rally hard for causes. Multiple options presented in Tab 4 — Manning picks the direction.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card hook-card p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">&#127942;</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900">Engagement Activities</h3>
+                                <p class="text-stone-500 text-sm mt-1"><strong>Bike of the Night:</strong> Crowd-voted best bike wins a prize. <strong>Slow Race:</strong> Last rider across a cone lane without putting a foot down wins. Full details in Tab 2.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Projection -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Revenue Projection</h2>
+                <p class="text-xs text-brand-red font-semibold uppercase tracking-wider mb-4">&#9888; Illustrative — Placeholder Data Only</p>
+                <div class="sample-overlay" style="max-width: 520px; margin: 0 auto;">
+                    <canvas id="revenueChart" height="260"></canvas>
+                </div>
+                <p class="text-stone-400 text-xs mt-4 text-center leading-relaxed max-w-lg mx-auto">
+                    These template numbers should be replaced with your actual weeknight averages. We'll update projections with real data in Phase 2 after Manning provides baseline figures.
+                </p>
+            </div>
+
+            <!-- Recommended Night -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-4">Recommended Night</h2>
+                <p class="text-stone-500 text-sm mb-5">Three options ranked by strategic fit. Final selection is Manning's call — see Tab 5.</p>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 p-4 rounded-lg bg-green-50 border border-green-200">
+                        <span class="bg-green-600 text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
                         <div>
-                            <strong class="block text-stone-900">Incentive: Half-Price Appetizers</strong>
-                            <span class="text-sm">Already approved by GM. Acts as the primary culinary draw to get riders in seats.</span>
+                            <h3 class="font-bold text-stone-900">3rd Thursday of the Month</h3>
+                            <p class="text-stone-600 text-sm mt-1">Industry standard for bike nights nationwide. End-of-week energy without competing against Saturday group rides. Most motorcycle events cluster on Thursdays for a reason.</p>
                         </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="font-bold text-red-700 mr-2">2.</span>
+                    </div>
+                    <div class="flex items-start gap-4 p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <span class="bg-stone-500 text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
                         <div>
-                            <strong class="block text-stone-900">Safety Angle: "Rider Fuel"</strong>
-                            <span class="text-sm">To ensure a safe event, we push a $5 bottomless non-alcoholic drink special (e.g., Red Bull slushies, craft sodas) with an app purchase. Keeps the vibe responsible.</span>
+                            <h3 class="font-bold text-stone-900">2nd Sunday Afternoon</h3>
+                            <p class="text-stone-600 text-sm mt-1">Family-friendly daylight show. Catches riders returning from weekend trips. Lower noise risk and broader demographic appeal — but may conflict with Sunday church crowd at Applebee's.</p>
                         </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="font-bold text-red-700 mr-2">3.</span>
+                    </div>
+                    <div class="flex items-start gap-4 p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <span class="bg-stone-400 text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
                         <div>
-                            <strong class="block text-stone-900">The Hero Charity: Operation Rally Point</strong>
-                            <span class="text-sm">Based locally in Monroe on N Midland. Focusing on veteran support aligns perfectly with the target demographic.</span>
+                            <h3 class="font-bold text-stone-900">1st Wednesday</h3>
+                            <p class="text-stone-600 text-sm mt-1">"Hump Day" revenue booster for what's typically the deadest night. Less competition from other events. Downside: mid-week energy is lower and riders may skip for weeknight obligations.</p>
                         </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="font-bold text-red-700 mr-2">4.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─────────────────── TAB 2: OPERATIONS & LOGISTICS ─────────────────── -->
+        <section id="tab-operations" class="tab-panel space-y-8">
+
+            <!-- Parking Map -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Interactive Parking Map</h2>
+                <p class="text-stone-500 text-sm mb-5">Click each zone for details. All handicap-accessible spots remain untouched.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="parkingMap">
+                    <div class="map-zone p-4 bg-red-50 text-center rounded-lg" data-zone="applebees" onclick="toggleZone(this)">
+                        <span class="text-2xl block mb-1">&#127359;</span>
+                        <span class="font-bold text-sm text-stone-800">Applebee's Main Lot</span>
+                    </div>
+                    <div class="map-zone p-4 bg-blue-50 text-center rounded-lg" data-zone="pinnacle" onclick="toggleZone(this)">
+                        <span class="text-2xl block mb-1">&#127974;</span>
+                        <span class="font-bold text-sm text-stone-800">Pinnacle Bank</span>
+                    </div>
+                    <div class="map-zone p-4 bg-amber-50 text-center rounded-lg" data-zone="longhorn" onclick="toggleZone(this)">
+                        <span class="text-2xl block mb-1">&#129385;</span>
+                        <span class="font-bold text-sm text-stone-800">LongHorn Lot</span>
+                    </div>
+                    <div class="map-zone p-4 bg-green-50 text-center rounded-lg" data-zone="slowrace" onclick="toggleZone(this)">
+                        <span class="text-2xl block mb-1">&#127937;</span>
+                        <span class="font-bold text-sm text-stone-800">Slow Race Zone</span>
+                    </div>
+                </div>
+                <div id="zone-detail" class="bg-stone-50 rounded-lg p-4 text-sm text-stone-600 min-h-[80px] transition-all">
+                    <p class="text-stone-400 italic">Click a zone above to see details.</p>
+                </div>
+            </div>
+
+            <!-- Operational Details -->
+            <div>
+                <h2 class="text-xl font-bold text-stone-900 mb-4">Operational Details</h2>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#127949; Bike Parking Setup</h3>
+                        <p class="text-stone-500 text-sm">Rope off front rows for "Show Bikes" — visible from where riders eat. Assign 1 host or manager outside to direct regular cars away from the display zone. All handicap spots remain fully accessible at all times.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#129521; Kickstand Pucks</h3>
+                        <p class="text-stone-500 text-sm">Provide small plastic or wood pucks to prevent kickstands sinking into hot Georgia asphalt. Costs almost nothing but screams "these people know bikers." Can be branded with the Applebee's logo or event name.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#129506; Gear Check</h3>
+                        <p class="text-stone-500 text-sm">Designate a secure area (host stand shelf, a designated booth, or a rolling rack) for helmets and heavy jackets. Keeps table space clear and stops gear from blocking aisles. Simple sign: "Leave your lid, grab your seat."</p>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#129681; Outdoor Seating</h3>
+                        <span class="placeholder-badge">Recommendation — Needs Confirmation</span>
+                        <p class="text-stone-500 text-sm mt-2">If no existing patio, consider roping off 3-4 parking spots near the bike display for temporary high-top tables or folding benches. Lets guests eat near their rides. Manning to confirm feasibility and any corporate requirements.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#128161; Lighting</h3>
+                        <p class="text-stone-500 text-sm">Ensure adequate lighting for the "Show Bike" area after sunset. Chrome needs light to pop. Portable LED work lights or string lights if the lot is dim. Also a safety requirement for foot traffic around parked bikes.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="font-bold text-stone-900 mb-2">&#128104;&#8205;&#127859; Kitchen Surge Plan</h3>
+                        <span class="placeholder-badge">Critical — Needs Manning's Input</span>
+                        <p class="text-stone-500 text-sm mt-2">60-100 riders ordering half-price apps in a 90-minute window is a real operational challenge. How would you staff the line? Pre-prep options? This is a Phase 2 deep-dive — flagged for Manning in Tab 5.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slow Race Detail -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">&#127937; The Slow Race</h2>
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-stone-800 mb-2">What Is It?</h3>
+                        <p class="text-stone-500 text-sm">The last rider to cross a 50-foot cone lane <em>without putting a foot down</em> wins. It's a crowd-favorite at bike rallies — low speed, high comedy, zero risk of actual crashes. Think of it as a balance contest, not a race.</p>
+                    </div>
+                    <div class="space-y-3">
                         <div>
-                            <strong class="block text-stone-900">The Vibe: Low-Speed, High-Engagement</strong>
-                            <span class="text-sm">Features a "Bike of the Night" award and a skill-based "Slow Race" to keep guests engaged in the lot before/after eating.</span>
+                            <h3 class="font-semibold text-stone-800 mb-1">Setup</h3>
+                            <p class="text-stone-500 text-sm">Back row of the lot or a delivery lane. Completely separated from active traffic. Cones spaced 3 feet apart. Defined heats (e.g., 7 PM and 8 PM) to keep it organized.</p>
                         </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="bg-white rounded-xl p-6 md:p-8 border border-stone-200 shadow-sm flex flex-col">
-                <h3 class="text-xl font-bold text-stone-900 mb-2 text-center">Projected P&L Impact</h3>
-                <p class="text-xs text-stone-500 text-center mb-6">Visualizing estimated revenue lift for an average Tuesday vs. Bike Night.</p>
-                <div class="flex-grow flex items-center justify-center">
-                    <div class="chart-container">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
-                <p class="text-xs text-stone-400 mt-4 text-center italic">Projections based on 60+ attendees prioritizing food and N/A beverages over high-volume alcohol consumption.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="tab-logistics" class="tab-content">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2">Parking & Operations Battle Plan</h2>
-            <p class="text-stone-600 text-lg">
-                The Applebee's lot is small and cannot hold a large-scale ride-in without strategic overflow planning. Click the zones on the map below to review the proposed parking strategies and neighbor agreements.
-            </p>
-        </div>
-        <div class="grid lg:grid-cols-5 gap-6">
-            <div class="lg:col-span-3 bg-stone-200 rounded-xl p-6 border border-stone-300 relative shadow-inner">
-                <div class="text-xs font-bold text-stone-500 mb-3 uppercase tracking-widest text-center w-full border-b-2 border-dashed border-stone-400 pb-2">M.L.K. Jr Blvd (Access)</div>
-
-                <div class="grid grid-cols-12 grid-rows-6 gap-3 h-96 w-full">
-                    <div id="zone-longhorn" onclick="selectMapZone('longhorn')" class="interactive-zone col-span-4 row-span-6 bg-stone-50 border-2 border-stone-400 rounded-lg flex flex-col items-center justify-center p-2 text-center group">
-                        <span class="text-2xl mb-1 opacity-50">&#x1F969;</span>
-                        <span class="font-bold text-stone-700 text-sm">LongHorn</span>
-                        <span class="text-xs text-stone-500">Overflow B</span>
-                    </div>
-                    <div id="zone-main" onclick="selectMapZone('main')" class="interactive-zone selected col-span-8 row-span-4 bg-red-50 border-2 border-red-600 rounded-lg flex flex-col items-center justify-center relative shadow-md text-center">
-                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">EVENT ZERO</div>
-                        <span class="text-3xl mb-1">&#x1F34E;</span>
-                        <span class="font-extrabold text-red-800 text-lg uppercase tracking-wide">Applebee's</span>
-                        <span class="text-xs text-red-600 font-medium">Main Lot & Patio</span>
-                    </div>
-                    <div id="zone-race" onclick="selectMapZone('race')" class="interactive-zone col-span-5 row-span-2 bg-amber-100 border-2 border-amber-500 border-dashed rounded-lg flex flex-col items-center justify-center text-center">
-                        <span class="font-bold text-amber-800 text-sm">&#x26A0;&#xFE0F; Slow Race</span>
-                        <span class="text-xs text-amber-700">Roped Zone</span>
-                    </div>
-                    <div id="zone-bank" onclick="selectMapZone('bank')" class="interactive-zone col-span-3 row-span-2 bg-blue-50 border-2 border-blue-400 rounded-lg flex flex-col items-center justify-center text-center">
-                        <span class="text-xl mb-1 opacity-50">&#x1F3E6;</span>
-                        <span class="font-bold text-blue-800 text-sm">Pinnacle Bank</span>
-                        <span class="text-[10px] text-blue-600">Overflow A</span>
-                    </div>
-                </div>
-            </div>
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-md border border-stone-200 p-6 flex flex-col h-full">
-                <h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 border-b border-stone-100 pb-2">Zone Directives</h3>
-                <div id="logistics-detail" class="flex-grow">
-                    <!-- Content injected via JS -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="tab-marketing" class="tab-content">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2">Targeted Outreach Strategy</h2>
-            <p class="text-stone-600 text-lg">
-                Success depends on grassroots networking within the local motorcycle ecosystem, not just generic paid ads. Review our specific physical drop locations and digital communities below, alongside preview templates for social posts.
-            </p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="space-y-6">
-                <div class="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-                    <h3 class="font-bold text-stone-900 text-lg mb-4 flex items-center">
-                        <span class="text-xl mr-2">&#x1F4CD;</span> Physical Flyer Drops
-                    </h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <div class="bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs mr-3 mt-0.5">1</div>
-                            <div>
-                                <p class="font-semibold text-stone-800">Fixin' Two Cycle Repair</p>
-                                <p class="text-sm text-stone-600">Crucial influencer hub. Gaining the owner's buy-in is essential for word-of-mouth credibility.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs mr-3 mt-0.5">2</div>
-                            <div>
-                                <p class="font-semibold text-stone-800">Thrilltek Powersports</p>
-                                <p class="text-sm text-stone-600">Attracts the sport bike demographic. Excellent candidates to recruit for "Bike of the Night" guest judges.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs mr-3 mt-0.5">3</div>
-                            <div>
-                                <p class="font-semibold text-stone-800">Local Custom Shops (e.g., Walton Custom)</p>
-                                <p class="text-sm text-stone-600">Targeting the older cruiser/bagger demographic who appreciate the charity aspect.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-                    <h3 class="font-bold text-stone-900 text-lg mb-4 flex items-center">
-                        <span class="text-xl mr-2">&#x1F4BB;</span> Digital Hubs
-                    </h3>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-medium">Georgia Riders (32k members)</span>
-                        <span class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-medium">Walton County Community</span>
-                        <span class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-medium">Monroe Local News</span>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-stone-100 rounded-xl border border-stone-200 p-6 shadow-inner flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-stone-900">Social Media Playbook</h3>
-                    <div class="flex bg-white rounded-lg p-1 border border-stone-200 shadow-sm">
-                        <button onclick="setSocial('hype')" id="btn-hype" class="px-3 py-1 text-xs font-semibold rounded-md bg-stone-800 text-white transition-colors">Hype</button>
-                        <button onclick="setSocial('charity')" id="btn-charity" class="px-3 py-1 text-xs font-semibold rounded-md text-stone-600 hover:bg-stone-100 transition-colors">Charity</button>
-                        <button onclick="setSocial('countdown')" id="btn-countdown" class="px-3 py-1 text-xs font-semibold rounded-md text-stone-600 hover:bg-stone-100 transition-colors">Countdown</button>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-stone-200 rounded-lg p-5 shadow-sm mx-auto w-full max-w-sm flex-grow">
-                    <div class="flex items-center mb-3">
-                        <div class="h-10 w-10 bg-red-700 rounded-full flex items-center justify-center text-white font-bold text-sm">APP</div>
-                        <div class="ml-3">
-                            <p class="text-sm font-bold text-stone-900 leading-tight">Applebee's Monroe</p>
-                            <p class="text-xs text-stone-500">Sponsored &middot; &#x1F30E;</p>
+                        <div>
+                            <h3 class="font-semibold text-stone-800 mb-1">Safety</h3>
+                            <p class="text-stone-500 text-sm">"Participate at your own risk" signage recommended. Separated from pedestrian traffic. Manning's comfort level with this activity is addressed in Tab 5.</p>
                         </div>
                     </div>
-                    <div id="social-text" class="text-sm text-stone-800 whitespace-pre-line leading-relaxed mb-3 min-h-[120px]">
-                        <!-- Injected -->
-                    </div>
-                    <div class="h-40 bg-stone-200 rounded-md flex items-center justify-center text-stone-400 text-sm font-medium border border-stone-300">
-                        [ Event Image Placeholder ]
-                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="tab-compliance" class="tab-content">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2">Regulatory & Safety Constraints</h2>
-            <p class="text-stone-600 text-lg">
-                Ensuring a frictionless event means adhering strictly to local ordinances and state laws regarding charity collections. Review these guardrails.
-            </p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl border-l-4 border-amber-500 shadow-sm overflow-hidden">
-                <div class="bg-amber-50 px-6 py-4 border-b border-stone-100">
-                    <h3 class="text-lg font-bold text-amber-900">Donation Mechanics (GA Law)</h3>
-                </div>
-                <div class="p-6 space-y-4">
-                    <p class="text-sm text-stone-700">
-                        <strong>WARNING:</strong> Standard raffles (selling tickets for a prize) are heavily regulated in Georgia and require a complex Sheriff's permit for the 501c3.
-                    </p>
-                    <p class="text-sm font-semibold text-stone-900 mt-4 border-b border-stone-200 pb-1">Recommended Legal Alternatives:</p>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <span class="text-amber-500 mr-2">&#x2705;</span>
-                            <div>
-                                <strong class="text-sm text-stone-800">"Pass the Boot"</strong>
-                                <p class="text-xs text-stone-600">Physical, voluntary cash collection by Operation Rally Point reps at a designated table. Simplest execution.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-amber-500 mr-2">&#x2705;</span>
-                            <div>
-                                <strong class="text-sm text-stone-800">Percentage Night</strong>
-                                <p class="text-xs text-stone-600">Applebee's pledges a flat 10% of all sales generated between 6:00 PM and 9:00 PM directly to the charity.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="space-y-6">
-                <div class="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-stone-900 mb-3 flex items-center">
-                        <span class="mr-2 text-xl">&#x1F50A;</span> Noise Ordinances
-                    </h3>
-                    <p class="text-sm text-stone-700">
-                        Monroe restricts "Electronic Amplification" visible from the roadway.
-                         <br><br>
-                        <strong>Directive:</strong> No live outdoor bands without a specific municipal permit. Music must remain at "patio background" levels, and must be strictly controlled after 9:00 PM.
-                    </p>
-                </div>
-                <div class="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-stone-900 mb-3 flex items-center">
-                        <span class="mr-2 text-xl">&#x1F327;&#xFE0F;</span> Weather & Safety Policy
-                    </h3>
-                    <p class="text-sm text-stone-700">
-                        <strong>Rain Date:</strong> If precipitation probability exceeds 40% at 2:00 PM on event day, the event automatically pushes to the following Tuesday. All marketing must state this clearly.
-                        <br><br>
-                        <strong>Beverage Control:</strong> Servers instructed to actively push the $5 "Rider Fuel" N/A specials to motorcycle operators.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+        <!-- ─────────────────── TAB 3: MARKETING & OUTREACH ─────────────────── -->
+        <section id="tab-marketing" class="tab-panel space-y-8">
 
-    <section id="tab-action" class="tab-content">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden text-center">
-                <div class="bg-stone-900 p-8 text-white">
-                    <h2 class="text-3xl font-bold mb-4">Time to Build Version 2</h2>
-                    <p class="text-stone-300 text-lg">
-                        This document is just the initial framework. To create an actionable, finalized blueprint, we need to gather your specific operational insights.
-                    </p>
-                </div>
-
-                <div class="p-8 bg-stone-50">
-                    <h3 class="text-xl font-bold text-stone-800 mb-6 border-b border-stone-200 pb-2 inline-block">Key Topics We Need You to Consider:</h3>
-
-                    <div class="text-left space-y-4 mb-8">
-                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm flex">
-                            <span class="text-2xl mr-4 opacity-70">&#x1F91D;</span>
-                            <div>
-                                <strong class="text-stone-900 block">Neighbor Relations</strong>
-                                <span class="text-sm text-stone-600">How comfortable are you negotiating with the LongHorn GM for overflow? Can you secure written permission from Pinnacle Bank?</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm flex">
-                            <span class="text-2xl mr-4 opacity-70">&#x1F373;</span>
-                            <div>
-                                <strong class="text-stone-900 block">Kitchen Capacity</strong>
-                                <span class="text-sm text-stone-600">If we drop an extra 60-80 people primarily ordering half-price appetizers in a 90-minute window, how will the kitchen line handle the surge?</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm flex">
-                            <span class="text-2xl mr-4 opacity-70">&#x1F4B5;</span>
-                            <div>
-                                <strong class="text-stone-900 block">Charity Mechanics</strong>
-                                <span class="text-sm text-stone-600">Do you prefer the simplicity of them "Passing the Boot," or does corporate allow for a 10% designated sales window?</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm flex">
-                            <span class="text-2xl mr-4 opacity-70">&#x1F4DD;</span>
-                            <div>
-                                <strong class="text-stone-900 block">General Feedback</strong>
-                                <span class="text-sm text-stone-600">What do you like about this report? What do you dislike? What ideas are missing?</span>
-                            </div>
-                        </div>
+            <!-- Shop Circuit -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">The Shop Circuit</h2>
+                <p class="text-stone-500 text-sm mb-5">Bikers trust their mechanics more than algorithms. These are the places to physically drop flyers and build word-of-mouth. Ask shop owners to suggest vendor and artisan contacts too.</p>
+                <div class="grid sm:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-stone-50 rounded-lg p-4 border border-stone-200">
+                        <h3 class="font-bold text-sm text-stone-800">Fixin' Two Cycle Repair</h3>
+                        <p class="text-stone-500 text-xs mt-1">Monroe — Harley &amp; V-Twin specialist. Key influencer hub for the cruiser crowd.</p>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <a href="https://forms.gle/J9rnu8WB2mFhEFuJ6" target="_blank" rel="noopener noreferrer" class="bg-red-700 hover:bg-red-800 text-white text-lg font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:scale-105 flex items-center w-full sm:w-auto justify-center">
-                            <span>&#x1F4CB; Open the Feedback Form</span>
-                        </a>
-                        <p class="mt-4 text-sm font-medium text-stone-500">
-                            Please message <strong class="text-stone-700">Lonnie</strong> once you have submitted your answers.
-                        </p>
+                    <div class="bg-stone-50 rounded-lg p-4 border border-stone-200">
+                        <h3 class="font-bold text-sm text-stone-800">Thrilltek Powersports</h3>
+                        <p class="text-stone-500 text-xs mt-1">Monroe — Sport bike demographic. Different rider profile, same appetite for community events.</p>
+                    </div>
+                    <div class="bg-stone-50 rounded-lg p-4 border border-stone-200">
+                        <h3 class="font-bold text-sm text-stone-800">Stamey's Equipment Co.</h3>
+                        <p class="text-stone-500 text-xs mt-1">Monroe — Powersports &amp; ATV hub. Local node for the off-road and utility rider community.</p>
+                    </div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                    <strong>Research in Progress:</strong> Full list of motorcycle-related businesses within 20 miles of Monroe coming in Phase 2. Gemini is compiling the expanded list now.
+                </div>
+            </div>
+
+            <!-- Vendor & Artist Recruitment -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Vendor &amp; Artist Recruitment</h2>
+                <p class="text-stone-500 text-sm mb-4">This section was identified as a critical gap in v1.0. Vendors and artisans turn a dinner event into a <em>scene</em>.</p>
+                <div class="bg-stone-50 rounded-lg p-5 border border-stone-200 mb-4">
+                    <h3 class="font-bold text-stone-800 mb-2">"Space for Swag" Model</h3>
+                    <p class="text-stone-600 text-sm">Vendors get free lot space in exchange for providing giveaway items for charity drawings or engagement activities. No rental fees, no overhead. They get foot traffic; the event gets atmosphere and prizes.</p>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white border border-stone-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm font-medium">&#127912; Pinstripers &amp; Custom Painters</p>
+                    </div>
+                    <div class="bg-white border border-stone-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm font-medium">&#129348; Leather Workers</p>
+                    </div>
+                    <div class="bg-white border border-stone-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm font-medium">&#10024; Detailers &amp; Chrome Specialists</p>
+                    </div>
+                    <div class="bg-white border border-stone-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm font-medium">&#128295; Custom Parts &amp; Fabrication</p>
+                    </div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                    <strong>Research in Progress:</strong> Local artisans within 20 miles will be compiled for Phase 2. The bike shops above can help recruit — ask who does custom work locally when dropping flyers.
+                </div>
+            </div>
+
+            <!-- Digital Hubs -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Digital Hubs</h2>
+                <p class="text-stone-500 text-sm mb-4">Organic community posting, not paid corporate ads. These are the groups where riders actually hang out online.</p>
+                <div class="grid sm:grid-cols-2 gap-3 mb-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm"><strong>Georgia Riders</strong> — Facebook group, ~32k members</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm"><strong>Walton County Community Groups</strong> — Local audience</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-stone-700 text-sm"><strong>Monroe Local News Pages</strong> — Community bulletin boards</p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <p class="text-amber-800 text-sm"><strong>More groups coming in Phase 2</strong> — Full Facebook group research in progress</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-</main>
+            <!-- Lonnie's Digital Support -->
+            <div class="card p-6 sm:p-8 border-l-4 border-brand-red">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">Lonnie's Digital Support Role</h2>
+                <p class="text-stone-600 text-sm leading-relaxed mb-3">
+                    Lonnie has volunteered to handle post creation, digital marketing strategy, and social content remotely. This means the <em>creative and scheduling work</em> is covered at no cost to the restaurant.
+                </p>
+                <p class="text-stone-600 text-sm leading-relaxed">
+                    <strong>Manning will need someone local</strong> to post, manage replies, and engage with the community in real-time. A designated team member (host, bartender, or manager) who checks the event's social presence during and after each Bike Night.
+                </p>
+            </div>
 
-<footer class="bg-white border-t border-stone-200 py-6 text-center text-stone-500 text-sm">
-    <p>Internal Strategy Document: Applebee's Monroe Bike Night</p>
-</footer>
+            <!-- Social Post Previews -->
+            <div class="card p-6 sm:p-8 draft-watermark">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Social Post Previews</h2>
+                <p class="text-xs text-brand-red font-semibold uppercase tracking-wider mb-4">&#9888; Draft — For Tone Reference Only</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button onclick="switchPost('hype')" class="post-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-red text-white" data-post="hype">Hype Post</button>
+                    <button onclick="switchPost('charity')" class="post-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-stone-200 text-stone-700" data-post="charity">Charity Post</button>
+                    <button onclick="switchPost('countdown')" class="post-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-stone-200 text-stone-700" data-post="countdown">Countdown Post</button>
+                </div>
+                <div id="postPreview" class="bg-stone-50 rounded-lg p-5 border border-stone-200 text-sm text-stone-700 leading-relaxed min-h-[100px]">
+                </div>
+                <p class="text-stone-400 text-xs mt-3">These show Manning the <em>style and tone</em> of posts, not final copy. Specifics (night, charity name, date) will be finalized in Phase 2 after his evaluation.</p>
+            </div>
+        </section>
 
-<script>
-    // --- Navigation Logic ---
+        <!-- ─────────────────── TAB 4: CHARITY & COMPLIANCE ─────────────────── -->
+        <section id="tab-compliance" class="tab-panel space-y-8">
+
+            <!-- Charity Options -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-4">Charity Options</h2>
+                <p class="text-stone-500 text-sm mb-5">Veteran-focused organizations align perfectly with biker culture. Here are three candidates — Manning picks the direction.</p>
+                <div class="space-y-4">
+                    <div class="p-4 rounded-lg bg-green-50 border border-green-200">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">RECOMMENDED</span>
+                        </div>
+                        <h3 class="font-bold text-stone-900">Operation Rally Point</h3>
+                        <p class="text-stone-600 text-sm mt-1">501(c)(3) based right in Monroe on N Midland Ave. Veteran crisis intervention and homelessness support. Hyper-local mission that aligns perfectly with biker demographics. Their proximity makes coordination easy.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <h3 class="font-bold text-stone-900">American Legion Post 64</h3>
+                        <p class="text-stone-600 text-sm mt-1">~400 members, very active in Walton County. Built-in audience for cross-promotion — their members become your riders. Strong existing community presence.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <h3 class="font-bold text-stone-900">Veterans Charity Ride</h3>
+                        <p class="text-stone-600 text-sm mt-1">National organization specializing in "Motorcycle Therapy." Could partner with a local chapter. Brings a built-in brand and national recognition to the event.</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <h3 class="font-bold text-stone-800 text-sm">&#128161; The Rotation Idea</h3>
+                    <p class="text-stone-600 text-sm mt-1">Manning could pick 3-4 charities and rotate monthly to spread the impact and keep things fresh. Or stick with one for brand consistency. His call — see Tab 5.</p>
+                </div>
+            </div>
+
+            <!-- Donation Mechanics -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-4">Donation Mechanics</h2>
+                <div class="space-y-4">
+                    <div class="p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <h3 class="font-bold text-stone-800">Option A: "Pass the Boot"</h3>
+                        <p class="text-stone-600 text-sm mt-1">Physical voluntary cash collection by charity reps at a designated table. Simplest execution. Zero corporate friction. The charity handles their own money — Applebee's just provides the stage.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <h3 class="font-bold text-stone-800">Option B: Percentage Night</h3>
+                        <p class="text-stone-600 text-sm mt-1">Applebee's pledges a flat percentage of sales during the event window. More impactful, but requires corporate buy-in. Manning has flagged that corporate approvals are hard-won — he fought to get half-price apps approved.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-stone-50 border border-stone-200">
+                        <h3 class="font-bold text-stone-800">Option C: Vendor-Donated Giveaways</h3>
+                        <p class="text-stone-600 text-sm mt-1">Instead of running a raffle, vendors donate items (free detail, free pinstripe, gear, etc.) that are given away to attendees who donate. Avoids raffle legality entirely while creating an incentive loop.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why NOT a Raffle -->
+            <div class="card p-6 sm:p-8 border-l-4 border-brand-amber">
+                <h2 class="text-lg font-bold text-stone-900 mb-2">&#9888; Why NOT a Raffle?</h2>
+                <p class="text-stone-600 text-sm leading-relaxed">
+                    Georgia heavily regulates raffles — ticket sales for prizes require a Sheriff's permit tied to the 501(c)(3). It's complex, slow, and bureaucratic. Not worth it for a monthly casual event. Steer clear unless Manning specifically wants to pursue the permitting process. The vendor-donated giveaway model achieves a similar feel without the legal overhead.
+                </p>
+            </div>
+
+            <!-- Noise Ordinances -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">Noise Ordinances — Monroe, GA</h2>
+                <div class="space-y-2 text-sm text-stone-600">
+                    <p>&#8226; Monroe restricts electronic amplification audible beyond the property line</p>
+                    <p>&#8226; No live outdoor bands without a municipal permit</p>
+                    <p>&#8226; Music must stay at "patio background" levels — strictly controlled after 9 PM</p>
+                    <p>&#8226; Motorcycle exhaust noise is <em>not</em> regulated the same way as amplified music, but keeping revving contained is good community relations</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mt-4">
+                    <strong>Research in Progress:</strong> Specific ordinance code references for Monroe will be compiled in Phase 2.
+                </div>
+            </div>
+
+            <!-- Weather Policy -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">Weather Policy</h2>
+                <div class="space-y-2 text-sm text-stone-600">
+                    <p>&#8226; Recommend a pre-established rain date: push to the following week, same night</p>
+                    <p>&#8226; All marketing materials must clearly state the rain date policy</p>
+                    <p>&#8226; Suggested threshold: if precipitation forecast exceeds 40% by early afternoon, Manning makes the call</p>
+                    <p>&#8226; Post the cancellation or postponement to all digital hubs by 2 PM on event day</p>
+                </div>
+            </div>
+
+            <!-- Police / Community Relations -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">Police &amp; Community Relations</h2>
+                <p class="text-stone-600 text-sm leading-relaxed mb-3">
+                    Recommend Manning loop in Monroe PD ahead of the first event. Not because there's a problem — because getting ahead of it builds goodwill and shows professionalism.
+                </p>
+                <p class="text-stone-600 text-sm leading-relaxed">
+                    Option to invite an officer for a "Safety Booth" presence. Bikers + veterans + charity = the police should be allies, not adversaries. This framing makes the event look organized and community-positive from day one.
+                </p>
+            </div>
+
+            <!-- Bike of the Night Prizes -->
+            <div class="card p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-stone-900 mb-3">&#127942; "Bike of the Night" Prize Options</h2>
+                <p class="text-stone-500 text-sm mb-4">Crowd votes on the best-looking bike in the show area. Prize tiers from free to sponsored:</p>
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <div class="bg-stone-50 rounded-lg p-3 border border-stone-200">
+                        <p class="text-stone-700 text-sm"><strong>$0:</strong> Manager's meal comp voucher, presented in a fun way ("The Golden Burger Award")</p>
+                    </div>
+                    <div class="bg-stone-50 rounded-lg p-3 border border-stone-200">
+                        <p class="text-stone-700 text-sm"><strong>~$50/mo:</strong> Printed certificates or small custom plaques. Collectible factor.</p>
+                    </div>
+                    <div class="bg-stone-50 rounded-lg p-3 border border-stone-200">
+                        <p class="text-stone-700 text-sm"><strong>Vendor-Donated:</strong> Free detail, pinstripe session, or gear from a participating vendor.</p>
+                    </div>
+                    <div class="bg-stone-50 rounded-lg p-3 border border-stone-200">
+                        <p class="text-stone-700 text-sm"><strong>Sponsored:</strong> Ask a local bike shop for a "Grand Prize" — free oil change, discount on parts, etc.</p>
+                    </div>
+                </div>
+                <p class="text-stone-400 text-xs mt-3">Manning picks his budget comfort level — see Tab 5.</p>
+            </div>
+        </section>
+
+        <!-- ─────────────────── TAB 5: MANNING'S EVALUATION ─────────────────── -->
+        <section id="tab-evaluation" class="tab-panel space-y-8">
+
+            <div class="card p-6 sm:p-8 border-2 border-brand-red bg-red-50">
+                <h2 class="text-2xl font-black text-stone-900 mb-2 text-center">Phase 2 Cannot Begin Without Your Input</h2>
+                <p class="text-stone-600 text-sm text-center leading-relaxed max-w-2xl mx-auto">
+                    Everything you've just reviewed is the research foundation. Your answers below will shape the final executable plan — from which night we pick to how we staff the kitchen. Review the 10 questions below, then click the button to open the evaluation form.
+                </p>
+            </div>
+
+            <!-- 10 Question Previews -->
+            <div>
+                <h2 class="text-xl font-bold text-stone-900 mb-4">What You'll Be Asked</h2>
+                <p class="text-stone-500 text-sm mb-5">Preview each question so you can think before you write. The actual form is linked at the bottom.</p>
+                <div class="space-y-3">
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">First Impressions</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">What do you like? What makes you hesitant? What's missing from this concept?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Pick Your Night</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Thursday, Sunday, or Wednesday? Which week of the month? What drives your preference?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Overflow Parking</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Comfort level negotiating with Pinnacle Bank and LongHorn? Existing relationships or cold intro?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Kitchen Readiness</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">How would you staff for a 75-100 person appetizer surge in 90 minutes? Any pre-prep strategies?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">5</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Charity Direction</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Operation Rally Point, American Legion, rotation model, or something else? What will corporate allow?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">6</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Donation Mechanics</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Pass the Boot, percentage of sales, or vendor-donated giveaways? What's realistic at your level?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">7</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Vendor &amp; Artist Interest</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Do you know local artisans? Open to the "Space for Swag" model? Any vendor contacts already?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">8</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Social Media Ownership</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Who on your team will manage the local Facebook presence? Lonnie handles post creation remotely — you need boots on the ground.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">9</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Slow Race &amp; Activities</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">Comfortable with the slow race concept? Prefer a different activity? Where would you set it up?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card question-card p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="bg-brand-amber text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">10</span>
+                            <div>
+                                <h3 class="font-bold text-stone-900 text-sm">Open Floor</h3>
+                                <p class="text-stone-500 text-xs mt-0.5">What's missing? What local connections do you have that we haven't tapped? (Voice-to-text encouraged — 30,000 character limit.)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="text-center py-6">
+                <a href="https://forms.gle/J9rnu8WB2mFhEFuJ6" target="_blank" rel="noopener noreferrer"
+                   class="inline-block bg-brand-red hover:bg-brand-redDark text-white font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                    Open the Evaluation Form &rarr;
+                </a>
+                <p class="text-stone-400 text-sm mt-3">Opens in a new tab. Please message Lonnie once you've submitted your answers.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════ FOOTER ═══════════════════════════════════════════ -->
+    <footer class="bg-stone-900 text-stone-500 text-center py-6 text-xs">
+        <p>Bike Night Blueprint v2.0 &mdash; Phase 1: Concept Evaluation</p>
+        <p class="mt-1">Prepared for Applebee's Monroe &#8226; 145 M.L.K. Jr Blvd, Monroe, GA 30655</p>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════ SCRIPTS ═══════════════════════════════════════════ -->
+    <script>
+    // ── Tab Navigation ──
     function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => {
-            el.classList.remove('active');
-        });
-        document.getElementById(tabId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+    });
 
-        document.querySelectorAll('.nav-tab').forEach(el => {
-            el.classList.remove('active', 'text-red-700', 'border-red-700');
-        });
-        const clickedTab = document.getElementById('nav-' + tabId.split('-')[1]);
-        clickedTab.classList.add('active');
+    // ── Parking Map Zones ──
+    var zoneData = {
+        applebees: {
+            title: "Applebee's Main Lot",
+            html: '<strong>Primary venue.</strong> Front rows roped off for "Show Bikes" — visible from the dining area. One host or manager stationed outside to direct regular car traffic. All handicap spots remain fully accessible. <em>Note: Outdoor seating TBD — temporary high-tops in 3-4 spots near bikes are recommended if Manning approves.</em>'
+        },
+        pinnacle: {
+            title: 'Pinnacle Bank — Overflow A',
+            html: '<strong>After-hours overflow.</strong> Bank closes before event time, so the lot sits empty. Ideal for additional bike and car parking. Requires a conversation with the branch manager — could be a simple handshake deal. Low risk, high upside.'
+        },
+        longhorn: {
+            title: 'LongHorn Steakhouse — Overflow B',
+            html: '<strong>Negotiation required.</strong> LongHorn will be open during the event, so this is a shared-use situation. Would need a cooperative agreement — possibly a reciprocal "we send you our overflow, you benefit from foot traffic" pitch. Harder sell than the bank lot.'
+        },
+        slowrace: {
+            title: 'Slow Race Zone',
+            html: "<strong>Activity area.</strong> Back row of the Applebee's lot, delivery lane, or bank lot (if negotiated). Completely separated from active traffic. Cones 3 feet apart forming a 50-foot lane. Defined heats at 7 PM and 8 PM to keep it organized. \"Participate at your own risk\" signage recommended."
+        }
+    };
 
-        if(tabId === 'tab-pitch' && !chartRendered) {
-            renderChart();
+    function toggleZone(el) {
+        var zone = el.dataset.zone;
+        var wasActive = el.classList.contains('active');
+        document.querySelectorAll('.map-zone').forEach(function(z) { z.classList.remove('active'); });
+        var detail = document.getElementById('zone-detail');
+        if (wasActive) {
+            detail.innerHTML = '<p class="text-stone-400 italic">Click a zone above to see details.</p>';
+        } else {
+            el.classList.add('active');
+            var d = zoneData[zone];
+            detail.innerHTML = '<h4 class="font-bold text-stone-800 mb-1">' + d.title + '</h4><p>' + d.html + '</p>';
         }
     }
 
-    // --- Chart.js Logic ---
-    let chartRendered = false;
-    function renderChart() {
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+    // ── Social Post Switcher ──
+    var posts = {
+        hype: '<strong>&#128293; [EVENT NIGHT] is about to get LOUD.</strong><br><br>Applebee\'s Monroe is kicking off monthly Bike Nights — and you\'re invited to the inaugural ride-in.<br><br>&#127831; Half-price apps<br>&#129380; Rider Fuel drink specials<br>&#127942; "Bike of the Night" award<br>&#127937; Slow Race (last one across wins)<br><br>Roll up. Eat cheap. Show off your ride.<br><br>&#128205; 145 M.L.K. Jr Blvd, Monroe<br>&#128342; [TIME TBD]<br><br>#BikeNightMonroe #ApplebeesBikeNight #RideAndDine',
+        charity: '<strong>&#127895; Ride for a reason.</strong><br><br>Every Bike Night at Applebee\'s Monroe supports [CHOSEN CHARITY] — right here in our community.<br><br>Show up. Eat well. Give back.<br><br>100% of donations go directly to [CHOSEN CHARITY]. No middlemen, no overhead. Just bikers helping neighbors.<br><br>&#128205; 145 M.L.K. Jr Blvd, Monroe<br>&#128342; [TIME TBD]<br><br>#RidersGiveBack #MonroeStrong',
+        countdown: '<strong>&#9200; [X] days until Bike Night.</strong><br><br>The lot is prepped. The apps are priced. The slow race cones are ready.<br><br>Are you?<br><br>Tag your riding crew below. &#128071;<br><br>&#128205; Applebee\'s Monroe<br>&#128197; [DATE TBD]<br><br>#BikeNightCountdown #MonroeBikeNight'
+    };
+
+    function switchPost(type) {
+        document.querySelectorAll('.post-btn').forEach(function(b) {
+            b.classList.remove('bg-brand-red', 'text-white');
+            b.classList.add('bg-stone-200', 'text-stone-700');
+        });
+        var btn = document.querySelector('[data-post="' + type + '"]');
+        btn.classList.remove('bg-stone-200', 'text-stone-700');
+        btn.classList.add('bg-brand-red', 'text-white');
+        document.getElementById('postPreview').innerHTML = posts[type];
+    }
+
+    // ── Revenue Chart ──
+    function initChart() {
+        var ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Standard Tuesday', 'Est. Bike Night'],
+                labels: ['Avg. Weeknight (Baseline)', 'Projected Bike Night'],
                 datasets: [
                     {
-                        label: 'Food Sales',
-                        data: [1500, 2200],
-                        backgroundColor: '#d6d3d1',
+                        label: 'Food Revenue',
+                        data: [1400, 2200],
+                        backgroundColor: 'rgba(192, 57, 43, 0.7)',
                         borderRadius: 4
                     },
                     {
-                        label: 'N/A Bev (Rider Fuel)',
-                        data: [300, 800],
-                        backgroundColor: '#fbbf24',
+                        label: 'N/A Beverages',
+                        data: [200, 550],
+                        backgroundColor: 'rgba(212, 160, 23, 0.7)',
                         borderRadius: 4
                     },
                     {
-                        label: 'Alcoholic Bev',
-                        data: [600, 750],
-                        backgroundColor: '#b91c1c',
+                        label: 'Alcoholic Beverages',
+                        data: [800, 1000],
+                        backgroundColor: 'rgba(120, 113, 108, 0.5)',
                         borderRadius: 4
                     }
                 ]
@@ -419,165 +700,33 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter' } } },
+                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, padding: 16 } },
                     tooltip: {
-                        backgroundColor: 'rgba(28, 25, 23, 0.9)',
-                        titleFont: { family: 'Inter', size: 14 },
-                        bodyFont: { family: 'Inter', size: 13 },
                         callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
-                                }
-                                return label;
-                            }
+                            label: function(ctx) { return ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(); }
                         }
                     }
                 },
                 scales: {
-                    x: { stacked: true, grid: { display: false } },
+                    x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
                     y: {
-                         stacked: true,
-                        beginAtZero: true,
-                        border: { display: false },
+                        stacked: true,
+                        grid: { color: '#f0eeec' },
                         ticks: {
-                            callback: function(value) { return '$' + value; },
-                            font: { family: 'Inter' }
+                            font: { family: 'Inter', size: 11 },
+                            callback: function(v) { return '$' + v.toLocaleString(); }
                         }
                     }
                 }
             }
         });
-        chartRendered = true;
     }
 
-    // --- Interactive Map Logic ---
-    const mapData = {
-        'main': {
-            title: "Event Zero: Applebee's Lot",
-            tag: "Primary Location",
-            color: "text-red-700",
-            bg: "bg-red-50",
-            desc: "This is the core operational zone. We must balance event excitement with regular dinner traffic.",
-            points: [
-                "Rope off the first 2 rows closest to the patio strictly for motorcycles ('Show Bikes').",
-                "Assign 1 Host/Manager outside to direct regular cars away from the roped area.",
-                "Ensure all handicap spots remain fully accessible at all times."
-            ]
-        },
-        'longhorn': {
-            title: "Overflow B: LongHorn",
-            tag: "Negotiation Required",
-            color: "text-stone-800",
-            bg: "bg-stone-100",
-            desc: "A highly convenient but politically sensitive overflow option.",
-            points: [
-                "Strategy: Use for 'Cage' (Car/Truck) parking overflow only.",
-                "Risk: They are actively open during dinner. Only viable if their lot is historically underutilized on Tuesdays.",
-                "Action: GM must speak directly with LongHorn GM regarding shared traffic flow."
-            ]
-        },
-        'bank': {
-            title: "Overflow A: Pinnacle Bank",
-            tag: "After-Hours Parking",
-            color: "text-blue-700",
-            bg: "bg-blue-50",
-            desc: "The safest and most viable option for off-site car parking.",
-            points: [
-                "Status: Bank closes after 5:00 PM.",
-                "Action: Secure written permission from bank management to avoid any towing risks for our guests.",
-                "Safety Check: Confirm if lot lights stay on overnight. If dark, do not use."
-            ]
-        },
-        'race': {
-            title: "Activity: Slow Race Zone",
-            tag: "Controlled Environment",
-            color: "text-amber-700",
-            bg: "bg-amber-50",
-            desc: "A low-speed, skill-based competition that keeps riders engaged without reckless riding.",
-            points: [
-                "Location: Utilize the delivery lane or the very back row of the lot.",
-                "Setup: Place safety cones 3ft apart spanning a 50ft line.",
-                "Safety: MUST be completely separated from active lot traffic.",
-                "Timing: Run defined heats (e.g., 7:00 PM and 8:00 PM) to control crowd movement."
-            ]
-        }
-    };
-
-    function selectMapZone(zoneKey) {
-        document.querySelectorAll('.interactive-zone').forEach(el => {
-            el.classList.remove('selected', 'border-red-600', 'border-blue-500', 'border-amber-600', 'border-stone-800');
-            el.style.borderWidth = "2px";
-            el.style.boxShadow = "none";
-        });
-
-        const selectedEl = document.getElementById('zone-' + zoneKey);
-        selectedEl.classList.add('selected');
-
-        if(zoneKey === 'main') selectedEl.classList.add('border-red-600');
-        if(zoneKey === 'bank') selectedEl.classList.add('border-blue-500');
-        if(zoneKey === 'race') selectedEl.classList.add('border-amber-600');
-        if(zoneKey === 'longhorn') selectedEl.classList.add('border-stone-800');
-
-        const data = mapData[zoneKey];
-        const detailContainer = document.getElementById('logistics-detail');
-
-        let html = `
-            <div class="animate-[fadeIn_0.2s_ease-in-out]">
-                <div class="mb-4">
-                    <span class="inline-block px-2 py-1 text-xs font-bold rounded ${data.color} ${data.bg} border border-current mb-2 uppercase tracking-wide">${data.tag}</span>
-                    <h4 class="text-xl font-bold ${data.color}">${data.title}</h4>
-                    <p class="text-sm text-stone-600 mt-2">${data.desc}</p>
-                </div>
-                <ul class="space-y-3 border-t border-stone-100 pt-4">
-        `;
-
-        data.points.forEach((point, index) => {
-            html += `
-                <li class="flex items-start text-sm text-stone-700">
-                    <span class="font-bold ${data.color} mr-2 mt-0.5">${index + 1}.</span>
-                    <span>${point}</span>
-                </li>
-            `;
-        });
-
-        html += `</ul></div>`;
-        detailContainer.innerHTML = html;
-    }
-
-    // --- Social Media Logic ---
-    const socialData = {
-        'hype': "\uD83D\uDD25 MONROE! It's happening.\n\nStarting soon, Applebee's is hosting the biggest mid-week Bike Night in Walton County.\n\n\uD83C\uDF54 Half-Price Apps\n\uD83C\uDFC6 'Bike of the Night' Trophy\n\uD83D\uDC22 The Slow Race Challenge\n\nTag your riding crew. We're filling the lot! #MonroeBikeNight #Applebees #GaRiders",
-        'charity': "Riding for a cause. \uD83C\uDDFA\uD83C\uDDF8\n\nThis Bike Night isn't just about chrome and wings. We're proud to support Monroe's own **Operation Rally Point**.\n\nCome meet the team, grab some 'Rider Fuel' (Bottomless N/A Drinks for $5), and support our local vets. \n\nSee you Tuesday! \uD83C\uDFCD\uFE0F #SupportLocal #Vets #BikeNight",
-        'countdown': "\u26A0\uFE0F 24 HOURS TO GO \u26A0\uFE0F\n\nThe weather is looking perfect. The lot is prepped. The wings are ready.\n\nWho is taking home the Slow Race Champion title tomorrow night?\n\nKickstands up at 6 PM. Arrive early to secure a spot in the Show Zone! \n\n\uD83D\uDCCD 145 M.L.K. Jr Blvd\n#MonroeGA #BikeLife"
-    };
-
-    function setSocial(type) {
-        ['hype', 'charity', 'countdown'].forEach(btn => {
-            const el = document.getElementById('btn-' + btn);
-            el.className = "px-3 py-1 text-xs font-semibold rounded-md text-stone-600 hover:bg-stone-100 transition-colors";
-        });
-        const activeBtn = document.getElementById('btn-' + type);
-        activeBtn.className = "px-3 py-1 text-xs font-semibold rounded-md bg-stone-800 text-white transition-colors";
-
-        const textEl = document.getElementById('social-text');
-        textEl.style.opacity = 0;
-        setTimeout(() => {
-            textEl.innerText = socialData[type];
-            textEl.style.opacity = 1;
-            textEl.style.transition = "opacity 0.2s";
-        }, 150);
-    }
-
-    // Initialize defaults on load
-    window.onload = () => {
-        renderChart();
-        selectMapZone('main');
-        setSocial('hype');
-    };
-</script>
-
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', function() {
+        initChart();
+        switchPost('hype');
+    });
+    </script>
 </body>
 </html>
